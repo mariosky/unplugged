@@ -1,0 +1,60 @@
+{% extends "xyz/base.html" %}
+{% load staticfiles %}
+{% block body %}
+
+
+  <header class="">
+        <div class="header_wrapper container">
+        	<a href="index.html" class="logo"><img src="{{ static_url}}frame/img/logo.png" alt="" class="logo_def" width="125" height="39"><img src="{{ static_url}}frame/img/retina/logo.png" alt="" class="logo_retina" width="125" height="39"></a>
+<nav>
+                <ul class="menu">
+                    <li><a href="/index.html">HOME</a> </li>
+                    <li><a href="/about">ABOUT</a> </li>
+                    <li><a href="/masonry">GENERATIONS</a> </li>
+                    <li><a href="javascript:void(0)">ARTISTS</a>
+                        <ul class="sub-menu">
+                              {% for artist in artists %}
+                            <li><a href="/artist/{{ artist.id }}"> {{ artist.first_name }} {{ artist.last_name }} </a></li>
+                         {% endfor %}
+
+                        </ul>
+                    </li>
+                    <li class="current-menu-parent">
+                        <a href="/grid">GALLERY</a>
+                    </li>
+                </ul><!-- .menu -->
+                <div class="clear"></div>
+            </nav>
+        </div>
+    </header>
+    
+    <div class="fullscreen_block">
+		<div class="fs_grid_module">
+        {% for painting in paintings %}
+        	<div class="grid_gallery-item">
+            	<div class="item_hover">
+                    <div class="item_hover-img">
+                        <img src="{{static_url}}{{ painting.image }}" alt=""/>
+                        <div class="item_hover-fadder"></div>
+                        <a href="{{static_url}}{{ painting.image }}" rel="prettyPhoto[gallery1]" class="prettyPhoto"></a><a href="/gallery_paint/{{ painting.id }}" class="post_link"></a>
+                    </div>
+                    <div class="item_hover-body">
+                        <div class="item_hover-title"><h3>{{ painting.title }}</h3></div>
+                        <div class="item_hover-descr">
+
+                        </div>
+                    </div>
+                </div>
+            </div><!-- .grid_gallery-item -->
+        {% endfor %}
+
+
+            <div class="clear"></div>
+        </div><!-- .fs_grid_module -->
+	</div> <!-- .fullscreen_block -->   
+    <div class="header2top"></div>
+{% endblock body %}
+
+{% block scripts %}
+
+{% endblock scripts %}

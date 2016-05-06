@@ -1,0 +1,48 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="{{ STATIC_URL}}assets/ico/favicon.png">
+
+    <title>Signin</title>
+
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" type="text/css" href="{% static 'frame/css/bootstrap.css'%}" >
+
+    <!-- Custom styles for this template -->
+
+<link rel="stylesheet" type="text/css" href="{% static 'css/signin.css'%}">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="{{ static_url}}/assets/js/html5shiv.js"></script>
+      <script src="{{ static_url}}/assets/js/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <div class="container">
+
+      <form action="index.html" method="post" class="form-signin">{% csrf_token %}
+        <h2 class="form-signin-heading">Por favor inicia una sesión</h2>
+        <input name="username"  type="text" class="form-control" placeholder="User" autofocus>
+        <input name="password" type="password" class="form-control" placeholder="Password">
+        <label class="checkbox">
+          <input type="checkbox" value="remember-me"> Recuérdame
+        </label>
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Iniciar</button>
+
+      </form>
+
+    </div> <!-- /container -->
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+  </body>
+</html>

@@ -1,0 +1,87 @@
+{% extends "xyz/base.html" %}
+{% load staticfiles %}
+{% block body %}
+
+
+	<header class="">
+        <div class="header_wrapper container">
+        	<a href="index.html" class="logo"><img src="{{ static_url}}frame/img/logo.png" alt="" class="logo_def" width="125" height="39"><img src="{{ static_url}}frame/img/retina/logo.png" alt="" class="logo_retina" width="125" height="39"></a>
+<nav>
+                <ul class="menu">
+                    <li><a href="/index.html">HOME</a> </li>
+                    <li><a href="/about.html">ABOUT</a> </li>
+                    <li><a href="/masonry">GENERATIONS</a> </li>
+                    <li class="current-menu-parent"><a href="javascript:void(0)">ARTISTS</a>
+                        <ul class="sub-menu">
+                              {% for artist in artists %}
+                            <li><a href="/artist/{{ artist.id }}"> {{ artist.first_name }} {{ artist.last_name }} </a></li>
+                         {% endfor %}
+
+                        </ul>
+                    </li>
+                    <li><a href="javascript:void(0)">GALLERIES</a>
+                        <ul class="sub-menu">
+                             <li><a href="/kenburns">Kenburns Gallery</a></li>
+                            <li><a href="/grid">Grid Gallery</a></li>
+                        </ul>
+                    </li>
+                </ul><!-- .menu -->
+                <div class="clear"></div>
+            </nav>
+        </div>
+    </header>
+    
+    <div class="fullscreen_block">
+    	<div class="fullscreen_title">
+        	<h1>{{ usr.first_name }} {{ usr.last_name }}</h1>
+        	<a href="javascript:history.back()" class="btn_close"></a>
+            <!--<a href="#" class="btn_next"></a>
+            <a href="#" class="btn_prev"></a>-->
+        </div>
+
+	    <div class="fullscreen_content_wrapper">
+            <div class="featured_slider_wrapper fullscreen_container">
+            	<a href="javascript:void(0)" class="featured_prev"></a><a href="javascript:void(0)" class="featured_next"></a>
+            	<ul class="featured_slider-list">
+                 {% for painting in paintings %}
+                	<li><img src="{{static_url}}{{ painting.image }}" alt="{{ painting.title }}" /></li>
+                 {% endfor %}
+                </ul>
+            </div>
+        </div><!-- .fullscreen_content_wrapper -->
+
+        <div class="fullscreen_content">
+            <a href="javascript:void(0)" class="content_toggle"><span class="collapse">Collapse</span><span class="show">Show info</span></a>        
+            <div class="fullscreen_content_padding">
+                <div class="row-fluid">
+                    <div class="span12 module_cont module_fs_meta module_none_padding">
+                        <p><span>Info</span>  <a href="#">Info</a></p>
+                        <p><span>Author:</span> John Doe</p>
+                    </div>
+                </div><!-- .row-fluid -->
+
+                <div class="row-fluid">
+                    <div class="span12 module_cont module_contact_icons module_small_padding1">
+                        <a href="#" class="ico_socialize_facebook1 ico_socialize type1"></a>
+                        <a href="#" class="ico_socialize_twitter2 ico_socialize type1"></a>
+                        <a href="#" class="ico_socialize_pinterest ico_socialize type1"></a>
+                        <a href="#" class="ico_socialize_google2 ico_socialize type1"></a>
+                    </div>
+                </div><!-- .row-fluid -->                    
+
+                <div class="row-fluid">
+                    <div class="span12 module_cont module_text_area module_small_padding">
+                    No more information about the artist at the moment
+                    </div>
+                </div><!-- .row-fluid -->
+
+            </div><!-- .fullscreen_content_padding -->
+        </div><!-- .fullscreen_content -->
+        
+	</div>
+      <div class="header2top"></div>
+{% endblock body %}
+
+{% block scripts %}
+
+{% endblock scripts %}

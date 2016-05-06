@@ -1,0 +1,466 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="{% static 'assets/ico/favicon.png'%}">
+    <title>Starter Template for Bootstrap</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="{% static 'css/bootstrap.css'%}" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link rel="stylesheet" type="text/css" href="{% static 'fancybox/jquery.fancybox-1.3.4.css'%}" media="screen" />
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="{% static 'fancybox/assets/js/html5shiv.js'%}"></script>
+      <script src="{% static 'assets/js/respond.min.js'%}" "{{ STATIC_URL}}"></script>
+    <![endif]-->
+
+
+
+
+   <link href="{% static 'css/starter-template.css'%}" rel="stylesheet">
+
+   <script src="{% static 'assets/js/jquery.js'%}"></script>
+   <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+   <script src="{% static 'js/bootstrap.min.js'%}"></script>
+   <!-- Add fancyBox-->
+   <link rel="stylesheet" href="{% static 'fancybox/source/jquery.fancybox.css'%}" type="text/css" media="screen" />
+   <script type="text/javascript" src="{% static 'fancybox/source/jquery.fancybox.pack.js'%}"></script>
+          <script  type="text/javascript" charset="utf-8">
+      function fileSelected() {
+      var file = document.getElementById('fileToUpload').files[0];
+      if (file) {
+        var fileSize = 0;
+        if (file.size > 1024 * 1024)
+          fileSize = (Math.round(file.size * 100 / (1024 * 1024)) / 100).toString() + 'MB';
+        else
+          fileSize = (Math.round(file.size * 100 / 1024) / 100).toString() + 'KB';
+        document.getElementById('fileName').innerHTML = 'Nombre: ' + file.name;
+        document.getElementById('fileSize').innerHTML = 'Tamaño: ' + fileSize;
+        document.getElementById('fileType').innerHTML = 'Tipo: ' + file.type;
+        }
+     }
+       function updateFile() {
+  var xhr = new XMLHttpRequest();
+  var fd = new FormData(document.getElementById('form1')) ;
+  fd.append("title",document.getElementById("title_update").value);
+  fd.append("summary",document.getElementById("description_update").value);
+  fd.append("id",$( "#update-form").data("id"));
+  xhr.addEventListener("load", updateComplete, false);
+  xhr.addEventListener("error", uploadFailed, false);
+  xhr.open("POST", "update_paint");
+  xhr.send(fd);
+       }
+     function updateComplete()
+     {
+          $( "#update-form" ).dialog( "close" );
+          $( "#next_generation").empty();
+          getCollectionUser();
+     }
+     function uploadProgress(evt) {
+            if (evt.lengthComputable) {
+       var percentComplete = Math.round(evt.loaded * 100 / evt.total);
+            document.getElementById('progressNumber').innerHTML = percentComplete.toString() + '%';
+             }
+            else {
+            document.getElementById('progressNumber').innerHTML = 'imposible calcular';
+            }
+    }
+     function uploadFile() {
+  var xhr = new XMLHttpRequest();
+  var fd = new FormData(document.getElementById('form1')) ;
+  fd.append("title",document.getElementById("title").value);
+  fd.append("summary",document.getElementById("Description").value);
+  fd.append("generation","{{next_gen.generation_number}}");
+  fd.append("parents",get_parents().join());
+  /* event listners */
+  xhr.upload.addEventListener("progress", uploadProgress, false);
+  xhr.addEventListener("load", uploadComplete, false);
+  xhr.addEventListener("error", uploadFailed, false);
+  xhr.addEventListener("abort", uploadCanceled, false);
+  /* Be sure to change the url below to the url of your upload server side script */
+  xhr.open("POST", "/upload_minimal");
+  xhr.send(fd);
+       }
+     function uploadProgress(evt) {
+            if (evt.lengthComputable) {
+       var percentComplete = Math.round(evt.loaded * 100 / evt.total);
+            document.getElementById('progressNumber').innerHTML = percentComplete.toString() + '%';
+             }
+            else {
+            document.getElementById('progressNumber').innerHTML = 'imposible calcular';
+            }
+    }
+function uploadComplete(evt) {
+  var response = JSON.parse(this.response) ;
+  var paintings = response.result;
+  for (var i=0; i<paintings.length; i++){
+        var $thrash =  $('<a />',{class:"btn btn-sm delete",href:"#" }).append($("<span />", {class:"glyphicon glyphicon-trash"} ) );
+        $thrash.data('id', paintings[i][0]);
+        var $edit =  $('<a />',{class:"btn btn-sm edit",href:"#" , id:paintings[i][0]}).append($("<span />", {class:"glyphicon glyphicon-pencil"} ) );
+        $edit.data('title',paintings[i][2]);
+        $edit.data('summary', paintings[i][3]);
+        $edit.data('id', paintings[i][0]);
+        var $caption = $('<div><h6>'+paintings[i][2] +'</h6></div>', {class:"caption"}).append($edit, $thrash );
+        var $fanzy  =  $('<a/>',{class:"fancybox",href:paintings[i][1] }).append(
+                           $('<img />', {src:paintings[i][1],alt:"title" }))
+        var $thumbnail =  $('<div />',{class:"thumbnail",id:paintings[i][0] }).append($fanzy, $caption)
+        $('<div />', {class:"col-sm-3 col-md-2"} ).append( $thumbnail).appendTo("#next_generation")
+         $("#title")[0].value="";
+         $("#Description")[0].value="";
+         $("#fileName")[0].value="";
+         $("#fileSize")[0].value="";
+         $("#fileType")[0].value="";
+         $("#progressNumber")[0].value="";
+         $( "#dialog-form" ).dialog( "close" );
+    }
+  /* This event is raised when the server send back a response */
+}
+function uploadFailed(evt) {
+  alert("Hubo un error al tratar de subir la imagen.");
+}
+function uploadCanceled(evt) {
+  alert("Se ha cancelado la subida de la imagen o el nevegador ha caido la conexión con el servidor.");
+}
+function get_parents()
+{
+var parents = new Array();
+$(".btn-success").parent().parent().each(
+function(i, element){
+parents[i]=element.id;
+}
+);
+return parents;
+}
+    </script>
+
+
+     <script type="text/javascript" charset="utf-8">
+       function delete_painting(painting_id)
+        {
+              $.ajax(
+                {
+                    url: '/evoart',
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify({"jsonrpc": "2.0", "method": "delete_painting", "params": [painting_id], "id": 1 }),
+                    dataType: "json",
+                    success: function(data, textStatus, jqXHR) {
+                        $( "#next_generation").empty();
+                        getCollectionUser();
+                     },
+                    error: function(jqXHR, textStatus, errorThrown)  {
+                        alert ("Error:" + textStatus+" "+errorThrown+" "+jqXHR.responseText);}
+                });
+        }
+      function getCollectionUser(){
+                $.ajax(
+                {
+                    url: '/evoart',
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify({"jsonrpc": "2.0", "method": "get_paintings_user", "params": [{{current_gen.generation_number}} ], "id": 1 }),
+                    dataType: "json",
+                    success: function(data, textStatus, jqXHR) {
+                        //data = jQuery.parseJSON(data);
+						var paintings =data.result;
+                         for (var i=0; i<paintings.length; i++){
+                             var $thrash =  $('<a />',{class:"btn btn-sm delete",href:"#" }).append($("<span />", {class:"glyphicon glyphicon-trash"} ) );
+                             $thrash.data('id', paintings[i][0]);
+                             var $edit =  $('<a />',{class:"btn btn-sm edit",href:"#" ,id:paintings[i][0] }).append($("<span />", {class:"glyphicon glyphicon-pencil"} ) );
+                             $edit.data('title',paintings[i][2]);
+                             $edit.data('summary', paintings[i][3]);
+                             $edit.data('id', paintings[i][0]);
+                             var $caption = $('<div><h6>'+paintings[i][2] +'</h6></div>', {class:"caption"}).append($edit, $thrash );
+                             var $fanzy  =  $('<a/>',{class:"fancybox",href:paintings[i][1] }).append(
+                                                $('<img />', {src:paintings[i][1],alt:"title" }));
+                             var $thumbnail =  $('<div />',{class:"thumbnail",id:paintings[i][0] }).append($fanzy, $caption);
+                             $('<div />', {class:"col-sm-3 col-md-2"} ).append( $thumbnail).appendTo("#next_generation");
+                          }
+                     $("#next_generation").on("click","a.edit"  , function (){
+                            $("#title_update")[0].value=$(this).data('title');
+                            $("#description_update")[0].value=$(this).data('summary');
+                            $( "#update-form").data("id",$(this).data('id'));
+                            $( "#update-form" ).dialog( "open" );
+                            });
+                     },
+                    error: function(jqXHR, textStatus, errorThrown)  {
+                        alert ("Error:" + textStatus+" "+errorThrown+" "+jqXHR.responseText);}
+                });
+        };
+      $(document).ready(function() {
+           $( "#dialog-form" ).dialog({
+                autoOpen: false,
+                height: 450,
+                width: 550,
+                modal: true,
+                buttons: {},
+                Cancel: function() {
+                $( this ).dialog( "close" );
+                }
+                ,
+                Close: function() {
+                $( this ).dialog( "close" );
+                }
+            });
+          $( "#update-form" ).dialog({
+                autoOpen: false,
+                height: 300,
+                width: 550,
+                modal: true,
+                buttons: {},
+                Cancel: function() {
+                $( this ).dialog( "close" );
+                }
+                ,
+                Close: function() {
+                $( this ).dialog( "close" );
+                }
+            });
+	/* This is basic - uses default settings */
+		$(".fancybox").fancybox();
+        $("#add-image").attr("disabled", "disabled");
+        $("#add-image").text("Selecciona uno o dos padres");
+        $("#add-image").on("click", function (){
+            $( "#dialog-form" ).dialog( "open" );
+        });
+        $("#next_generation").on("click","a.edit"  , function (){
+            $("#title_update")[0].value=$(this).data('title');
+            $("#description_update")[0].value=$(this).data('summary');
+            $( "#update-form").data("id",$(this).data('id'));
+            $( "#update-form" ).dialog( "open" );
+        });
+      $( "#dialog-confirm" ).dialog({
+        autoOpen:false,
+        resizable: false,
+        height:140,
+        width: 350,
+        modal: true,
+        buttons: {
+           "Borrar": function() {
+                    $( this ).dialog( "close" );
+                    delete_painting( $(this).data('id'));
+                      },
+            Cancel: function() {
+                    $( this ).dialog( "close" );
+                    }
+                }
+       });
+        $("#next_generation").on("click","a.delete"  , function (){
+                     $( "#dialog-confirm" ).data("id", $(this).data('id'));
+                     $( "#dialog-confirm" ).dialog( "open" );
+        });
+         $.ajaxSetup({
+	     beforeSend: function(xhr, settings) {
+	         function getCookie(name) {
+	             var cookieValue = null;
+	             if (document.cookie && document.cookie != '') {
+	                 var cookies = document.cookie.split(';');
+	                 for (var i = 0; i < cookies.length; i++) {
+	                     var cookie = jQuery.trim(cookies[i]);
+	                     // Does this cookie string begin with the name we want?
+	                 if (cookie.substring(0, name.length + 1) == (name + '=')) {
+	                     cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+	                     break;
+	                 }
+	             }
+	         }
+	         return cookieValue;
+	         }
+	         if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+	             // Only send the token to relative URLs i.e. locally.
+	             xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+	         }
+	     }
+         });
+        function getCollection(){
+                $.ajax(
+                {
+                    url: '/evoart',
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify({"jsonrpc": "2.0", "method": "get_paintings", "params": [{{current_gen.generation_number}} ], "id": 1 }),
+                    dataType: "json",
+                    success: function(data, textStatus, jqXHR) {
+                        //data = jQuery.parseJSON(data);
+						var paintings =data.result;
+                         for (var i=0; i<paintings.length; i++){
+                            // var $caption = $('<div />', {class:"caption"}).append( $('<a />',{class:"btn btn-sm",href:"#" }) )
+                             var $caption = $('<div><h6>'+paintings[i][2] +'</h6></div>', {class:"caption"}).append( $('<a />',{class:"btn btn-sm add",href:"#" }).append($("<span />", {class:"glyphicon glyphicon-heart"} ) ) );
+                             var $fanzy  =  $('<a/>',{class:"fancybox",href:paintings[i][1] }).append(
+                                                $('<img />', {src:paintings[i][1],alt:"title" }));
+                             var $thumbnail =  $('<div />',{class:"thumbnail",id:paintings[i][0] }).append($fanzy, $caption);
+                             $('<div />', {class:"col-sm-3 col-md-2"} ).append( $thumbnail).appendTo("#prev_generation");
+                         }
+                        $("#prev_generation a.add").click(function (){
+                            $(this).toggleClass("btn-success");
+                             if ( $(".btn-success").length > 0 && $(".btn-success").length <=2 )
+                            {
+                            $("#add-image").removeAttr("disabled");
+                            $("#add-image").text("Agrega nueva pintura");
+                            $("#add-image").addClass("btn-primary");
+                            }
+                            else
+                            {
+                            $("#add-image").removeClass("btn-primary");
+                            $("#add-image").attr("disabled", "disabled");
+                            $("#add-image").text("Selecciona uno o dos padres");
+                            }
+                        });
+                     },
+                    error: function(jqXHR, textStatus, errorThrown)  {
+                        alert ("Error:" + textStatus+" "+errorThrown+" "+jqXHR.responseText);}
+                });
+        };
+        getCollection();
+        getCollectionUser();
+    });
+</script>
+
+  </head>
+
+  <body>
+
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+
+          </button>
+          <a class="navbar-brand" href="/">XYZ Project</a>
+        </div>
+        <div class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+
+
+            <li class="active"><a href="/logout">Salir</a></li>
+
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </div>
+
+    <div class="container">
+
+<div class="row">
+     <div class="col-sm-3 col-md-3"> <h3> Ver generación:  </h3> </div>
+     <div class="col-sm-3 col-md-6">
+         <div class="btn-group">
+            {% for gen in past_gens %}
+                 <a href="/generation/{{gen.generation_number}}">  <button type="button" class="btn btn-default">  {{ gen.generation_number }}   </button></a>
+            {% endfor %}
+        </div>
+     </div>
+    </div>
+
+  <div class="row">
+     <div class="col-sm-3 col-md-6">  <h3 id="btn-groups-single"> {{current_gen.generation_name}}</h3> </div>
+     <div class="col-sm-4 col-md-6">
+         <button id="add-image" type="button"  class="btn">
+
+        </button>
+     </div>
+  </div>
+
+
+
+
+
+
+<section>
+  <div id="prev_generation" class="row">
+
+
+
+  </div>
+
+    <h3 id="btn-groups-single"> Aportación de {{user.username}} para la siguiente generación: </h3>
+
+   <div id="next_generation" class="row">
+
+
+
+  </div>
+
+
+ </section>
+
+<div id="dialog-confirm" title="¿Borrar la pintura?">
+<p><span class="ui-icon ui-icon-alert" style="float: left; margin: 0 7px 20px 0;">
+
+</span>Esta pintura será borrada definitivamente.</p>
+</div>
+
+
+<div id="dialog-form" title="Agrega nueva pintura">
+  <form id="form1" enctype="multipart/form-data" method="post" action="upload">
+
+
+
+    <div class="input-group">
+    <span class="input-group-addon">Titulo</span>
+    <input id="title" type="text" class="form-control"/>
+    </div>
+    <div class="input-group">
+        <span class="input-group-addon">Descripción</span>
+        <textarea  id="Description" class="form-control" rows="8" placeholder="Aquí la descripción"></textarea>
+    </div>
+
+    <label for="fileToUpload">Seleccione una imagen para agregar</label><br />
+    <input type="file" name="fileToUpload" id="fileToUpload" onchange="fileSelected();"/>
+
+
+    <div id="fileName"></div>
+    <div id="fileSize"></div>
+    <div id="fileType"></div>
+    <div class="row">
+      <input type="button" onclick="uploadFile()" value="Subir" />
+    </div>
+    <div id="progressNumber"></div>
+
+  </form>
+
+ </div>
+
+
+  <div id="update-form" title="Edición de Pintura">
+  <form id="form2" enctype="multipart/form-data" method="post" action="update_paint">
+
+   <div class="input-group">
+    <span class="input-group-addon">Titulo</span>
+    <input id="title_update" type="text" class="form-control"/>
+    </div>
+    <div class="input-group">
+        <span class="input-group-addon">Descripción</span>
+        <textarea  id="description_update" class="form-control" rows="8" placeholder="Aquí la descripción"></textarea>
+    </div>
+
+    <div class="row">
+      <input type="button" onclick="updateFile()" value="Guardar" />
+    </div>
+
+  </form>
+
+ </div>
+
+
+    </div><!-- /.container -->
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+
+  </body>
+</html>

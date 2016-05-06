@@ -1,0 +1,215 @@
+
+from django.http import HttpResponseRedirect, HttpResponse
+from django.conf import settings
+from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
+from django.shortcuts import render_to_response
+from django.template import RequestContext
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
+
+from models import Painting, Generation
+
+import urllib
+import urlparse
+
+import json
+
+
+
+def logout_view(request):
+    logout(request)
+    return render_to_response('xyz/signin.html', {}, context_instance=RequestContext(request))
+
+def gallery_masonry(request):
+    paintings = Painting.objects.all()
+    gens = Generation.objects.all()
+    artists = User.objects.filter(is_staff=False)
+    return render_to_response('xyz/portfolio_masonry.html',
+                              { 'static_url': settings.STATIC_URL,
+                                "paintings":paintings,
+                                "gens":gens,
+                                "artists":artists},
+                              context_instance=RequestContext(request))
+
+def gallery_grid(request):
+    paintings = Painting.objects.all()
+    artists = User.objects.filter(is_staff=False)
+    return render_to_response('xyz/gallery_grid.html', { 'static_url': settings.STATIC_URL,"paintings":paintings, "artists":artists}, context_instance=RequestContext(request))
+
+def gallery_kenburns(request):
+    paintings = Painting.objects.all()
+    artists = User.objects.filter(is_staff=False)
+    return render_to_response('xyz/gallery_kenburns.html', {'static_url': settings.STATIC_URL, "paintings":paintings,  "artists":artists}, context_instance=RequestContext(request))
+
+
+
+def artist(request, id):
+    usr = User.objects.get(pk=id)
+    paintings = Painting.objects.filter(author=usr)
+    artists = User.objects.filter(is_staff=False)
+    return render_to_response('xyz/blog_post_fw.html',
+                              {'static_url': settings.STATIC_URL,
+                               "paintings":paintings,
+                               "usr":usr,
+                               "artists":artists}, context_instance=RequestContext(request))
+
+
+def gallery_paint(request, id):
+    painting = Painting.objects.get(pk=id)
+    artists = User.objects.filter(is_staff=False)
+    return render_to_response('xyz/blog_left.html', { 'static_url': settings.STATIC_URL,"painting":painting , "artists":artists}, context_instance=RequestContext(request))
+
+
+def gallery(request):
+    paintings = Painting.objects.all()
+    artists = User.objects.filter(is_staff=False)
+    return render_to_response('xyz/frame.html',
+                              {'static_url': settings.STATIC_URL,
+                               "paintings":paintings,
+                               "artists":artists},
+                              context_instance=RequestContext(request))
+
+def about(request):
+    paintings = Painting.objects.all()
+    artists = User.objects.filter(is_staff=False)
+    return render_to_response('xyz/about.html', { 'static_url': settings.STATIC_URL,"paintings":paintings, "artists":artists}, context_instance=RequestContext(request))
+
+def index(request):
+    if request.user.is_authenticated():
+        return HttpResponseRedirect('last_generation')
+    else:
+        if request.method == 'POST':
+            username = request.POST['username']
+            password = request.POST['password']
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                if user.is_active:
+                    login(request, user)
+                    #return HttpResponse( 'nice login')
+                    #print "login"
+                    return HttpResponseRedirect('last_generation')# Redirect to a success page.
+                else:
+                # Return a 'disabled account' error message
+                    return HttpResponse( 'disabled account')
+
+            else:
+                return HttpResponse( 'invalid login')
+
+                # Return an 'invalid login' error message.
+        else:
+            return render_to_response('xyz/signin.html', {}, context_instance=RequestContext(request))
+
+
+def generation(request,gen=0):
+    if request.user.is_authenticated():
+        gen = int(gen)
+        # Trae la ultima generacion
+        next_gen = Generation.objects.filter(next_generation=True)[0]
+        past_gens =  Generation.objects.filter(generation_number__lte=next_gen.generation_number-1, generation_number__gt=0).order_by('generation_number')
+        print next_gen.generation_number,gen < next_gen.generation_number, gen != 0, type(gen), type(next_gen.generation_number)
+        # Si no se especifica la gen, significa que es la ultima y vamos a agregar nuevas pinturas
+        if gen != 0 and (gen < next_gen.generation_number):
+            old_gen = Generation.objects.filter(generation_number=gen)[0]
+            paintings = old_gen.painting_set.all()
+            return render_to_response('xyz/gen_view.html',{'static_url': settings.STATIC_URL,'next_gen':next_gen,
+                                "current_gen":old_gen, "paintings":paintings, "past_gens":past_gens},
+                                context_instance=RequestContext(request))
+        else:
+            current_gen = Generation.objects.filter(generation_number=next_gen.generation_number-1)[0]
+            paintings = current_gen.painting_set.all()
+            return render_to_response('xyz/generation.html', {'static_url': settings.STATIC_URL,'next_gen':next_gen,"current_gen" : current_gen,
+                                                          "paintings":paintings, "past_gens":past_gens}, context_instance=RequestContext(request))
+
+
+
+
+
+    else:
+        return render_to_response('xyz/signin.html', {}, context_instance=RequestContext(request))
+
+
+def upload(request):
+     return render_to_response('xyz/upload.html', {}, context_instance=RequestContext(request))
+
+
+
+
+@csrf_exempt
+def upload_minimal(request):
+    if request.method == 'POST':
+            print request.POST[u'parents']
+            #print 'Raw Data___: "%s"' % request.body
+            print request.FILES.keys()
+            print request.FILES["fileToUpload"]
+            print request.POST[u'generation']
+
+
+            gen = Generation.objects.get(generation_number=int(request.POST[u'generation']))
+
+            titulo = "Sin Titulo"
+            if request.POST[u'title'] == "":
+                titulo = request.POST[u'title']
+
+            painting = Painting(title=titulo, author=request.user, summary=request.POST[u'summary'],
+                                image=request.FILES["fileToUpload"],generation=gen)
+            painting.save()
+            for _id in request.POST[u'parents'].split(','):
+                painting.parents.add(Painting.objects.get(pk=_id))
+
+
+            result = [(painting.id, painting.image.url.split("?")[0], painting.title, painting.summary )]
+            data = json.dumps({"result":result , "error": None, "id": "upload_minimal"})
+            return HttpResponse(data, content_type='application/json')
+    else:
+        data = json.dumps(data = json.dumps({"result" : "saved","error": None, "id": "upload_minimal"}))
+        return HttpResponse(data, content_type='application/json')
+
+@csrf_exempt
+def update_paint(request):
+    if request.method == 'POST':
+            painting = Painting.objects.get(pk=int(request.POST[u'id']))
+            painting.title = request.POST[u'title']
+            if painting.title == "":
+                painting.title = "Sin Titulo"
+            painting.summary = request.POST[u'summary']
+
+            painting.save()
+            data = json.dumps({"result":None , "error": None, "id": "upload_minimal"})
+            return HttpResponse(data, content_type='application/json')
+    else:
+        data = json.dumps(data = json.dumps({"result" : "saved","error": None, "id": "upload_minimal"}))
+        return HttpResponse(data, content_type='application/json')
+
+
+
+
+def evoart(request):
+    if  request.method == 'POST':
+        json_data=json.loads(request.body)
+        method=json_data["method"]
+        params=json_data["params"]
+        id=json_data["id"]
+
+        if method == "get_paintings":
+            paintings = Painting.objects.filter(generation__generation_number=int(params[0]))
+
+            result = [(paint.id, paint.image.url.split("?")[0], paint.title) for paint in paintings]
+            data = json.dumps({"result":result , "error": None, "id": id})
+            return HttpResponse(data, content_type='application/javascript')
+
+        if method == "get_paintings_user":
+            paintings = Painting.objects.filter(generation__generation_number=int(params[0])+1,author=request.user)
+            result = [(paint.id, paint.image.url.split("?")[0], paint.title, paint.summary) for paint in paintings]
+            data = json.dumps({"result":result , "error": None, "id": id})
+            return HttpResponse(data, content_type='application/javascript')
+        if method == "delete_painting":
+            painting = Painting.objects.get(pk=int(params[0]))
+            painting.delete()
+            data = json.dumps({"result":"deleted" , "error": None, "id": id})
+            return HttpResponse(data, content_type='application/javascript')
+
+
+    else:
+        return HttpResponse("ajax & post please", content_type='text')
+

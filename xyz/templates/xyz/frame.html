@@ -1,0 +1,54 @@
+{% extends "xyz/base.html" %}
+{% load staticfiles %}
+{% block body %}
+	<header class="">
+        <div class="header_wrapper container">
+         <a href="index.html" class="logo"><img src="{% static 'frame/img/logo.png'%}" alt="" class="logo_def" width="125" height="39"><img src="{% static 'frame/img/retina/logo.png'%}" alt="" class="logo_retina" width="125" height="39"></a>
+         <nav>
+                <ul class="menu">
+                    <li class="current-menu-parent"><a href="/index.html">HOME</a> </li>
+                    <li><a href="/about">ABOUT</a> </li>
+                    <li><a href="/masonry">GENERATIONS</a> </li>
+                    <li><a href="javascript:void(0)">ARTISTS</a>
+                        <ul class="sub-menu">
+                        {% for artist in artists %}
+                            <li><a href="/artist/{{ artist.id }}"> {{ artist.first_name }} {{ artist.last_name }} </a></li>
+                         {% endfor %}
+                        </ul>
+                    </li>
+                                        <li>
+                        <a href="/grid">GALLERY</a>
+                    </li>
+
+                </ul><!-- .menu -->
+                <div class="clear"></div>
+            </nav>
+        </div>
+    </header>
+    
+    <div class="fullscreen_block"></div>    
+  <div class="header2top"></div>
+
+{% endblock body %}
+
+{% block scripts %}
+    <script>
+		gallery_set = [	//Gallery Data
+            {% for painting in paintings %}
+
+          	{image : "{{static_url }}{{painting.image}}", thmb : '', alt : '', fit : 'cover', title : "{{ painting.title }}", description: ""},
+
+
+            {% endfor %}
+
+		];
+		$('body').fs_gallery({
+			fx : 'fade', /*fade, zoom, slide_left, slide_right, slide_top, slide_bottom*/
+			slide_time : 3300, /*This time must be < then time in css*/
+			slides : gallery_set
+		});
+	</script>
+    
+{% endblock scripts %}
+
+

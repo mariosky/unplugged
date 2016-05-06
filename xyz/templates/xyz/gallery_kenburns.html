@@ -1,0 +1,80 @@
+{% extends "xyz/base.html" %}
+{% load staticfiles %}
+{% block body %}
+	<header class="">
+        <div class="header_wrapper container">
+        	<a href="index.html" class="logo"><img src="img/logo.png" alt="" class="logo_def" width="125" height="39"><img src="img/retina/logo.png" alt="" class="logo_retina" width="125" height="39"></a>
+ <nav>
+                <ul class="menu">
+                    <li><a href="/index.html">HOME</a> </li>
+                    <li><a href="/about">ABOUT</a> </li>
+                    <li><a href="/masonry">GENERATIONS</a> </li>
+                    <li class="current-menu-parent"><a href="javascript:void(0)">ARTISTS</a>
+                        <ul class="sub-menu">
+                              {% for artist in artists %}
+                            <li><a href="/artist/{{ artist.id }}"> {{ artist.first_name }} {{ artist.last_name }} </a></li>
+                         {% endfor %}
+
+                        </ul>
+                    </li>
+                    <li><a href="javascript:void(0)">GALLERIES</a>
+                        <ul class="sub-menu">
+                            <li><a href="/kenburns">Kenburns Gallery</a></li>
+                            <li><a href="/grid">Grid Gallery</a></li>
+                        </ul>
+                    </li>
+                </ul><!-- .menu -->
+                <div class="clear"></div>
+            </nav>
+        </div>
+    </header>
+    
+    <div class="fullscreen_block">
+    	<div class="gallery_kenburns">
+            <canvas id="kenburns">
+                <p>Your browser doesn't support canvas!</p>
+            </canvas>
+        </div>
+    </div>    
+
+
+    
+{% endblock body %}
+
+{% block scripts %}
+	<script type="text/javascript">
+        $(document).ready(function(){
+            $('#kenburns').attr('width', $(window).width());
+            $('#kenburns').attr('height', $(window).height());
+            $('#kenburns').kenburns({
+                images:[{% for painting in paintings %}
+                                '{{static_url}}{{ painting.image }}',
+                        {% endfor %}
+                        ],
+                frames_per_second: 30,
+                display_time: 5000,
+                fade_time: 1000,
+                zoom: 1.2,
+                background_color:'#000000'
+            });
+        });
+
+        $(window).resize(function(){
+            $('#kenburns').remove();
+            $('.fullscreen_block').append("<canvas id='kenburns'><p>Your browser doesn't support canvas!</p></canvas>");
+            $('#kenburns').attr('width', $(window).width());
+            $('#kenburns').attr('height', $(window).height());
+            $('#kenburns').kenburns({
+                images:[ {% for painting in paintings %}
+                                '{{static_url}}{{ painting.image }}',
+                        {% endfor %}
+                        ],
+                frames_per_second: 30,
+                display_time: 5000,
+                fade_time: 1000,
+                zoom: 1.2,
+                background_color:'#000000'
+            });
+        });
+    </script>
+{% endblock scripts %}
