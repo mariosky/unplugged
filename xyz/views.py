@@ -76,6 +76,7 @@ def about(request):
     return render_to_response('xyz/about.html', { 'static_url': settings.STATIC_URL,"paintings":paintings, "artists":artists}, context_instance=RequestContext(request))
 
 def index(request):
+
     if request.user.is_authenticated():
         return HttpResponseRedirect('last_generation')
     else:
@@ -83,29 +84,40 @@ def index(request):
             username = request.POST['username']
             password = request.POST['password']
             user = authenticate(username=username, password=password)
+            print "index-user"
             if user is not None:
                 if user.is_active:
                     login(request, user)
-                    #return HttpResponse( 'nice login')
-                    #print "login"
                     return HttpResponseRedirect('last_generation')# Redirect to a success page.
                 else:
                 # Return a 'disabled account' error message
                     return HttpResponse( 'disabled account')
 
             else:
-                return HttpResponse( 'invalid login')
+                return render_to_response('xyz/signin.html', {}, context_instance=RequestContext(request))
 
                 # Return an 'invalid login' error message.
         else:
             return render_to_response('xyz/signin.html', {}, context_instance=RequestContext(request))
 
 
+
+
 def generation(request,gen=0):
+    # In order to start the experiment, there has to be a minimum
+    # of one Generation:  Generation 0
+    # and a Next Generation 1
+
+
     if request.user.is_authenticated():
         gen = int(gen)
-        # Trae la ultima generacion
-        next_gen = Generation.objects.filter(next_generation=True)[0]
+        try:
+            next_gen = Generation.objects.filter(next_generation=True)[0]
+        except IndexError:
+            next_gen = None
+            return HttpResponse('There must be Generation tagged as: NEXT GENERATION')
+
+
         past_gens =  Generation.objects.filter(generation_number__lte=next_gen.generation_number-1, generation_number__gt=0).order_by('generation_number')
         print next_gen.generation_number,gen < next_gen.generation_number, gen != 0, type(gen), type(next_gen.generation_number)
         # Si no se especifica la gen, significa que es la ultima y vamos a agregar nuevas pinturas
