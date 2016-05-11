@@ -103,7 +103,19 @@ DATABASES = {}
 if os.environ.has_key('DATABASE_URL'):
     DATABASES['default'] =  dj_database_url.config(default=os.environ['DATABASE_URL'])
 else:
-    from settings_private import DATABASES
+    DATABASES = {
+        ###
+        ### Local Settings for testing
+        ###
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+            'NAME': 'xyz',  # Or path to database file if using sqlite3.
+            'USER': 'django',
+            'PASSWORD': 'masterkey',
+            'HOST': '127.0.0.1',  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+            'PORT': '',  # Set to empty string for default.
+        }
+    }
 
 
 STATIC_URL = 'http://' + AWS_STORAGE_BUCKET_NAME + '.s3.amazonaws.com/'
