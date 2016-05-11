@@ -33,7 +33,7 @@ urlpatterns = [
     url(r'^evoart', views.evoart, name='evoart'),
     url(r'^logout', views.logout_view, name='logout_view'),
     url(r'^update_paint', views.update_paint, name='update_paint'),
-    url(r'^gallery/$', views.gallery, name='gallery'),
+ #   url(r'^gallery/$', views.gallery, name='gallery'),
 
 
 ]

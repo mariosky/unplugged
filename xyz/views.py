@@ -64,7 +64,7 @@ def gallery_paint(request, id):
 def gallery(request):
     paintings = Painting.objects.all()
     artists = User.objects.filter(is_staff=False)
-    return render_to_response('xyz/frame.html',
+    return render_to_response('xyz/gallery_grid.html',
                               {'static_url': settings.STATIC_URL,
                                "paintings":paintings,
                                "artists":artists},
