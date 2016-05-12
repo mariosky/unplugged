@@ -34,6 +34,7 @@
     <div class="fullscreen_block">
     	<div class="fullscreen_title">
         	<h1>{{ usr.first_name }} {{ usr.last_name }}</h1>
+
         	<a href="javascript:history.back()" class="btn_close"></a>
             <!--<a href="#" class="btn_next"></a>
             <a href="#" class="btn_prev"></a>-->
@@ -53,10 +54,16 @@
         <div class="fullscreen_content">
             <a href="javascript:void(0)" class="content_toggle"><span class="collapse">Collapse</span><span class="show">Show info</span></a>        
             <div class="fullscreen_content_padding">
+<div class="span2 module_cont module_text_area">
+                                        	<img src="{{static_url}}{{ usr.artist.image }}" alt="{{usr.artist.first_name }}" />
+                     </div>
                 <div class="row-fluid">
+
+
                     <div class="span12 module_cont module_fs_meta module_none_padding">
-                        <p><span>Info</span>  <a href="#">Info</a></p>
-                        <p><span>Author:</span> John Doe</p>
+                        <br/>
+                        <p><span>email:</span>  <a href="#">{{ usr.email }}</a></p>
+
                     </div>
                 </div><!-- .row-fluid -->
 
@@ -70,8 +77,11 @@
                 </div><!-- .row-fluid -->                    
 
                 <div class="row-fluid">
-                    <div class="span12 module_cont module_text_area module_small_padding">
-                    No more information about the artist at the moment
+                    <div class="span12 module_cont module_fs_meta module_none_padding">
+                        <br/>
+
+                        <p><span>Shrot bio:</span>  {{ usr.artist.bio|safe }}</p>
+                        <p><span>Expositions:</span> {{ usr.artist.expositions|safe }}</p>
                     </div>
                 </div><!-- .row-fluid -->
 
