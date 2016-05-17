@@ -10,7 +10,7 @@ from django.contrib.auth.decorators import login_required
 
 from models import Painting, Generation
 
-import urllib
+import uuid
 import urlparse
 
 import json
@@ -150,18 +150,22 @@ def upload(request):
 @csrf_exempt
 def upload_minimal(request):
     if request.method == 'POST':
-            print request.POST[u'parents']
+            #print request.POST[u'parents']
             #print 'Raw Data___: "%s"' % request.body
-            print request.FILES.keys()
-            print request.FILES["fileToUpload"]
+            #print request.FILES.keys()
+            #print request.FILES["fileToUpload"]
             print request.POST[u'generation']
-
 
             gen = Generation.objects.get(generation_number=int(request.POST[u'generation']))
 
             titulo = "Sin Titulo"
-            if request.POST[u'title'] == "":
+
+
+            if request.POST[u'title']:
                 titulo = request.POST[u'title']
+
+            file_extension = request.FILES["fileToUpload"].name.split(".")[-1]
+            request.FILES["fileToUpload"].name = "GEN%s_%s.%s" % (request.POST[u'generation'] , uuid.uuid1().hex , file_extension)
 
             painting = Painting(title=titulo, author=request.user, summary=request.POST[u'summary'],
                                 image=request.FILES["fileToUpload"],generation=gen)
