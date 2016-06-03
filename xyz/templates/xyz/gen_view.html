@@ -113,8 +113,8 @@
      {% for painting in paintings %}
       <div class="col-sm-3 col-md-2">
           <div id="{{ painting.id }}" class="thumbnail">
-              <a class="fancybox" href="{{STATIC_URL}}{{ painting.image }}">
-                <img src="{{ STATIC_URL}}{{ painting.image }}" alt="{{ painting.title }}">
+              <a class="fancybox" href="{{static_url}}{{ painting.image }}">
+                <img src="{{ static_url}}{{ painting.image }}" alt="{{ painting.title }}">
               </a>
 
               <div class="caption">
